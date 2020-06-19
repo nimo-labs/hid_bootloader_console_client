@@ -47,12 +47,12 @@
 unsigned char *fileBuff;
 unsigned int sz;
 usb_hid_device_t *device = NULL;
-unsigned long flashAddress=0;
+unsigned long flashAddress = 0;
 
 void dumpUsb(unsigned char *packet)
 {
     printf("resp: ");
-    for(int i=0; i < 32; i++)
+    for (int i = 0; i < 32; i++)
     {
         printf("%.2X ", packet[i]);
     }
@@ -68,7 +68,7 @@ void waitResp(void)
         if (USB_HID_SUCCESS == usb_hid_read(device, resp, sizeof(resp)))
         {
             hidBlProtocolDeSerialisePacket(&recvPacket, resp);
-            if(HID_BL_PROTOCOL_PTYPE_ACK == recvPacket.packetType)
+            if (HID_BL_PROTOCOL_PTYPE_ACK == recvPacket.packetType)
                 break;
         }
     }
@@ -77,28 +77,28 @@ void waitResp(void)
 void writeFile(void)
 {
     struct hidBlProtocolPacket_s sendPacket;
-    unsigned long fileLoc=0;
+    unsigned long fileLoc = 0;
     unsigned char serPkt[64];
 
-    while(1)
+    while (1)
     {
-        printf("Progress: %ld%%\r",(fileLoc*100)/sz);
-        if (hidBlProtocolEncodePacket(&sendPacket, flashAddress+fileLoc,HID_BL_PROTOCOL_WRITE_INT_FLASH, &fileBuff[fileLoc], 32))
+        printf("Progress: %ld%%\r", (fileLoc * 100) / sz);
+        if (hidBlProtocolEncodePacket(&sendPacket, flashAddress + fileLoc, HID_BL_PROTOCOL_WRITE_INT_FLASH, &fileBuff[fileLoc], 32))
         {
             exit(1);
         }
-        hidBlProtocolSerialisePacket(&sendPacket, serPkt,sizeof(serPkt));
+        hidBlProtocolSerialisePacket(&sendPacket, serPkt, sizeof(serPkt));
         if (USB_HID_SUCCESS != usb_hid_write(device, serPkt, sizeof(serPkt)))
             error_exit("hid_write()");
-        fileLoc+=32;
+        fileLoc += 32;
         waitResp();
-        if(fileLoc > sz)
+        if (fileLoc > sz)
         {
-            if (hidBlProtocolEncodePacket(&sendPacket, 0,HID_BL_PROTOCOL_RUN_INT, NULL, 0))
+            if (hidBlProtocolEncodePacket(&sendPacket, 0, HID_BL_PROTOCOL_RUN_INT, NULL, 0))
             {
                 exit(1);
             }
-            hidBlProtocolSerialisePacket(&sendPacket, serPkt,sizeof(serPkt));
+            hidBlProtocolSerialisePacket(&sendPacket, serPkt, sizeof(serPkt));
             if (USB_HID_SUCCESS != usb_hid_write(device, serPkt, sizeof(serPkt)))
                 error_exit("hid_write()");
             break;
@@ -115,14 +115,21 @@ int main(int argc, char *argv[])
     FILE *ptr;
 
     /*Check command line args*/
-    if(argc < 2)
-        error_exit("No firmware image specified!");
+    if (argc < 3)
+    {
+        printf("Usage:\n\n");
+        printf("hid_boot mem_loc filename\n\n");
+        printf("Where:\n");
+        printf("mem_loc is the start location in hex (e.g. 0x1000)\n");
+        printf("filename is the firmware filename\n\n");
+        exit(1);
+    }
 
     /************************/
-    ptr = fopen(argv[1],"rb");  // r for read, b for binary
-    if(NULL == ptr)
+    ptr = fopen(argv[2], "rb"); // r for read, b for binary
+    if (NULL == ptr)
         error_exit("File not found.");
-    flashAddress = 0x1000; /*Starting point in flash of the application*/
+    flashAddress = strtol(argv[1], NULL, 16); /*Starting point in flash of the application*/
 
     /************************/
     fseek(ptr, 0L, SEEK_END);
@@ -130,7 +137,7 @@ int main(int argc, char *argv[])
     rewind(ptr);
     fileBuff = malloc(sz);
 
-    if(sz != fread(fileBuff,1,sz,ptr)) // read entire file into buffer
+    if (sz != fread(fileBuff, 1, sz, ptr)) // read entire file into buffer
         error_exit("fread returned fewer bytes that expected!");
     fclose(ptr);
 
@@ -151,9 +158,7 @@ int main(int argc, char *argv[])
 
     usb_hid_open(device);
 
-
     writeFile();
-
 
     usb_hid_close(device);
 
