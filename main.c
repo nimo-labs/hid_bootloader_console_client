@@ -68,7 +68,7 @@ void waitResp(void)
         if (USB_HID_SUCCESS == usb_hid_read(device, resp, sizeof(resp)))
         {
             hidBlProtocolDeSerialisePacket(&recvPacket, resp);
-            if (HID_BL_PROTOCOL_PTYPE_ACK == recvPacket.packetType)
+            if (HID_BL_PROTOCOL_ACK == recvPacket.packetType)
                 break;
         }
     }
@@ -147,7 +147,8 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < n_devices; i++)
     {
-        if (strstr(devices[i].product, "Generic HID"))
+        printf("%s\n", devices[i].product);
+        if (strstr(devices[i].product, "HID Transfer"))
         {
             check(NULL == device, "Multiple devices found.");
             device = &devices[i];
@@ -157,9 +158,9 @@ int main(int argc, char *argv[])
     check(NULL != device, "Supported bootloader not found.");
 
     usb_hid_open(device);
-
+    printf("H1\n");
     writeFile();
-
+    printf("H2\n");
     usb_hid_close(device);
 
     usb_hid_cleanup(devices, n_devices);
