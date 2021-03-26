@@ -107,6 +107,19 @@ void writeFile(void)
     printf("Progress 100%%\n");
 }
 
+void eraseIntFlash(void)
+{
+    struct hidBlProtocolPacket_s sendPacket;
+    unsigned char serPkt[64];
+    if (hidBlProtocolEncodePacket(&sendPacket, 0, HID_BL_PROTOCOL_ERASE_INT_FLASH, 0, 0))
+    {
+        exit(1);
+    }
+    hidBlProtocolSerialisePacket(&sendPacket, serPkt, sizeof(serPkt));
+    if (USB_HID_SUCCESS != usb_hid_write(device, serPkt, sizeof(serPkt)))
+        error_exit("hid_write()");
+    waitResp();
+}
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -115,21 +128,22 @@ int main(int argc, char *argv[])
     FILE *ptr;
 
     /*Check command line args*/
-    if (argc < 3)
+    if (argc < 4) /*Figure out something better here */
     {
         printf("Usage:\n\n");
-        printf("hid_boot mem_loc filename\n\n");
+        printf("hid_boot cmd mem_loc filename\n\n");
         printf("Where:\n");
+        printf("cmd is one of p (program) or e (erase internal flash)\n");
         printf("mem_loc is the start location in hex (e.g. 0x1000)\n");
         printf("filename is the firmware filename\n\n");
         exit(1);
     }
 
     /************************/
-    ptr = fopen(argv[2], "rb"); // r for read, b for binary
+    ptr = fopen(argv[3], "rb"); // r for read, b for binary
     if (NULL == ptr)
         error_exit("File not found.");
-    flashAddress = strtol(argv[1], NULL, 16); /*Starting point in flash of the application*/
+    flashAddress = strtol(argv[2], NULL, 16); /*Starting point in flash of the application*/
 
     /************************/
     fseek(ptr, 0L, SEEK_END);
@@ -158,9 +172,12 @@ int main(int argc, char *argv[])
     check(NULL != device, "Supported bootloader not found.");
 
     usb_hid_open(device);
-    printf("H1\n");
-    writeFile();
-    printf("H2\n");
+
+    if(0 == strncmp(argv[1], "w", 1))
+        writeFile();
+    else if(0 == strncmp(argv[1], "e", 1))
+        eraseIntFlash();
+
     usb_hid_close(device);
 
     usb_hid_cleanup(devices, n_devices);
