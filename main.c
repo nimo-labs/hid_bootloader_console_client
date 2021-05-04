@@ -161,8 +161,8 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < n_devices; i++)
     {
-        printf("%s\n", devices[i].product);
-        if (strstr(devices[i].product, "HID Transfer"))
+        //  printf("%s\n", devices[i].product);
+        if (strstr(devices[i].product, "HID Boot Loader"))
         {
             check(NULL == device, "Multiple devices found.");
             device = &devices[i];
