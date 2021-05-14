@@ -46,12 +46,22 @@
 #define CONFIG_MARKER_BEGIN 0xc70d8e1a
 #define CONFIG_MARKER_END 0xceab9d56
 
+enum e_command
+{
+    cmdNone,
+    cmdList,
+    cmdErase,
+    cmdWrite
+};
+
 unsigned char *fileBuff;
 unsigned int sz;
 usb_hid_device_t *device = NULL;
 unsigned long flashAddress = 0;
 uint32_t mfrId = 0;
 uint32_t partId = 0;
+
+enum e_command command = cmdNone;
 
 void dumpUsb(unsigned char *packet)
 {
@@ -90,10 +100,10 @@ void waitResp(void)
                 waiting = 0;
                 break;
             case HID_BL_PROTOCOL_SEND_MFR_ID:
-                printf("Mfr ID: 0x%.2X", recvPacket.data[3]);
-                printf("%.2X", recvPacket.data[2]);
-                printf("%.2X", recvPacket.data[1]);
-                printf("%.2X\n", recvPacket.data[0]);
+                // printf("Mfr ID: 0x%.2X", recvPacket.data[3]);
+                // printf("%.2X", recvPacket.data[2]);
+                // printf("%.2X", recvPacket.data[1]);
+                // printf("%.2X\n", recvPacket.data[0]);
 
                 mfrId = recvPacket.data[3] << 24;
                 mfrId |= recvPacket.data[2] << 16;
@@ -103,10 +113,10 @@ void waitResp(void)
                 waiting = 0;
                 break;
             case HID_BL_PROTOCOL_SEND_PART_ID:
-                printf("Part ID: 0x%.2X", recvPacket.data[3]);
-                printf("%.2X", recvPacket.data[2]);
-                printf("%.2X", recvPacket.data[1]);
-                printf("%.2X\n", recvPacket.data[0]);
+                // printf("Part ID: 0x%.2X", recvPacket.data[3]);
+                // printf("%.2X", recvPacket.data[2]);
+                // printf("%.2X", recvPacket.data[1]);
+                // printf("%.2X\n", recvPacket.data[0]);
 
                 partId = recvPacket.data[3] << 24;
                 partId |= recvPacket.data[2] << 16;
@@ -171,7 +181,7 @@ unsigned int checkUc(char *requestedUc)
 {
     struct hidBlProtocolPacket_s sendPacket;
     unsigned char serPkt[64];
-    printf("Requested UC: %s\n", strToLower(requestedUc));
+//   printf("Requested UC: %s\n", strToLower(requestedUc));
 
     if(0 == strncmp(strToLower(requestedUc), "m032lg6ae", 9))
     {
@@ -211,7 +221,7 @@ unsigned int checkUc(char *requestedUc)
     else
     {
         printf("Unknown microcontroller, try hid_boot l\n");
-        return 1;
+        exit(1);
     }
     return 0;
 }
@@ -235,44 +245,32 @@ int main(int argc, char *argv[])
     FILE *ptr;
 
     /*Check command line args*/
-    switch(argc)
+    if(argc >= 2)
     {
-    case 2:
         if (0 == strncmp(argv[1], "l", 1))
         {
+            command = cmdList;
             printf("Supported controllers:\n\n");
-            printf("m032lg2ae - Nuvoton M032LG2AE\n");
+            printf("m032lg6ae - Nuvoton M032LG6AE\n");
             printf("\n");
             exit(0);
         }
+        else if (0 == strncmp(argv[1], "e", 1))
+        {
+            command = cmdErase;
+            printf("Erasing internal flash:\n\n");
+        }
+        else if (0 == strncmp(argv[1], "w", 1))
+        {
+            command = cmdWrite;
+            printf("Writing internal flash:\n\n");
+        }
         else
+        {
             printUsage();
-        exit(1);
-        break;
-    case 5:
-        break;
-    default:
-        printUsage();
-        exit(1);
-        break;
+            exit(1);
+        }
     }
-
-
-    /************************/
-    ptr = fopen(argv[4], "rb"); // r for read, b for binary
-    if (NULL == ptr)
-        error_exit("File not found.");
-    flashAddress = strtol(argv[3], NULL, 16); /*Starting point in flash of the application*/
-
-    /************************/
-    fseek(ptr, 0L, SEEK_END);
-    sz = ftell(ptr);
-    rewind(ptr);
-    fileBuff = malloc(sz);
-
-    if (sz != fread(fileBuff, 1, sz, ptr)) // read entire file into buffer
-        error_exit("fread returned fewer bytes that expected!");
-    fclose(ptr);
 
     usb_hid_init();
 
@@ -280,7 +278,6 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < n_devices; i++)
     {
-        //  printf("%s\n", devices[i].product);
         if (strstr(devices[i].product, "HID Boot Loader"))
         {
             check(NULL == device, "Multiple devices found.");
@@ -292,17 +289,54 @@ int main(int argc, char *argv[])
 
     usb_hid_open(device);
 
-    checkUc(argv[2]);
 
-    if(0 == strncmp(argv[1], "w", 1))
-        writeFile();
-    else if(0 == strncmp(argv[1], "e", 1))
-        eraseIntFlash();
-    else
+
+    switch(command)
     {
+    case cmdList:
+
+        break;
+
+    case cmdWrite:
+        if(5 == argc)
+        {
+            checkUc(argv[2]);
+            /************************/
+            ptr = fopen(argv[4], "rb"); // r for read, b for binary
+            if (NULL == ptr)
+                error_exit("File not found.");
+            flashAddress = strtol(argv[3], NULL, 16); /*Starting point in flash of the application*/
+
+            /************************/
+            fseek(ptr, 0L, SEEK_END);
+            sz = ftell(ptr);
+            rewind(ptr);
+            fileBuff = malloc(sz);
+
+            if (sz != fread(fileBuff, 1, sz, ptr)) // read entire file into buffer
+                error_exit("fread returned fewer bytes that expected!");
+            fclose(ptr);
+            writeFile();
+        }
+        else
+            printUsage();
+        break;
+
+    case cmdErase:
+        if(3 == argc)
+        {
+            checkUc(argv[2]);
+            eraseIntFlash();
+        }
+        else
+            printUsage();
+        break;
+    default:
         printUsage();
         exit(1);
+        break;
     }
+
 
     usb_hid_close(device);
 
