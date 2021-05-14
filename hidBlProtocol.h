@@ -39,6 +39,16 @@
 #define HID_BL_PROTOCOL_VERIFY_EXT_FLASH 0x0E
 #define HID_BL_PROTOCOL_COPY_EXT_TO_INT 0x0F
 #define HID_BL_PROTOCOL_RUN_INT 0x10
+#define HID_BL_PROTOCOL_GET_MFR_ID 0x11
+#define HID_BL_PROTOCOL_GET_PART_ID 0x12
+#define HID_BL_PROTOCOL_SEND_MFR_ID 0x13
+#define HID_BL_PROTOCOL_SEND_PART_ID 0x14
+/*******************************************/
+
+/*Board IDs (Only used by USB hosts) */
+#define MFR_NUVOTON 0x000000DA
+#define PART_M032LG6AE 0x01132601
+
 /*******************************************/
 
 struct __attribute__((packed)) hidBlProtocolPacket_s

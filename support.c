@@ -51,7 +51,7 @@ void error_exit(char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    fprintf(stderr, "Error: ");
+    fprintf(stderr, "\nError: ");
     vfprintf(stderr, fmt, args);
     fprintf(stderr, "\n");
     va_end(args);
