@@ -39,7 +39,7 @@ ifeq ($(UNAME), Linux)
   SRCS += usb_hid_lin.c
   LIBS += -ludev
 else
-  BIN = hid_boot.exe
+  BIN = hidBoot.exe
   SRCS += usb_hid_win.c
   LIBS += -lhid -lsetupapi
 endif
