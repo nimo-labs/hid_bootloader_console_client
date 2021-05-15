@@ -35,7 +35,7 @@ HDRS = \
   usb_hid.h \
 
 ifeq ($(UNAME), Linux)
-  BIN = hid_boot
+  BIN = hidBoot
   SRCS += usb_hid_lin.c
   LIBS += -ludev
 else
