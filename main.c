@@ -1,7 +1,7 @@
 /*
  * This file is part of the hid_bootloader_console_client distribution
  * (https://github.com/nimo-labs/hid_bootloader_console_client).
- * Copyright (c) 2020 Nimolabs Ltd. www.nimo.uk
+ * Copyright (c) 2021 Nimolabs Ltd. www.nimo.uk
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
