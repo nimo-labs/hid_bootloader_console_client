@@ -1,4 +1,4 @@
-hid_boot
-hid_boot.exe
+hidBoot
+hidBoot.exe
 *.bin
 minicom.cap
