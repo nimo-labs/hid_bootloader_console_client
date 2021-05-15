@@ -51,7 +51,8 @@ enum e_command
     cmdNone,
     cmdList,
     cmdErase,
-    cmdWrite
+    cmdWrite,
+    cmdDevVer
 };
 
 unsigned char *fileBuff;
@@ -60,6 +61,7 @@ usb_hid_device_t *device = NULL;
 unsigned long flashAddress = 0;
 uint32_t mfrId = 0;
 uint32_t partId = 0;
+uint16_t blVer = 0;
 
 enum e_command command = cmdNone;
 
@@ -100,11 +102,6 @@ void waitResp(void)
                 waiting = 0;
                 break;
             case HID_BL_PROTOCOL_SEND_MFR_ID:
-                // printf("Mfr ID: 0x%.2X", recvPacket.data[3]);
-                // printf("%.2X", recvPacket.data[2]);
-                // printf("%.2X", recvPacket.data[1]);
-                // printf("%.2X\n", recvPacket.data[0]);
-
                 mfrId = recvPacket.data[3] << 24;
                 mfrId |= recvPacket.data[2] << 16;
                 mfrId |= recvPacket.data[1] << 8;
@@ -113,18 +110,17 @@ void waitResp(void)
                 waiting = 0;
                 break;
             case HID_BL_PROTOCOL_SEND_PART_ID:
-                // printf("Part ID: 0x%.2X", recvPacket.data[3]);
-                // printf("%.2X", recvPacket.data[2]);
-                // printf("%.2X", recvPacket.data[1]);
-                // printf("%.2X\n", recvPacket.data[0]);
-
                 partId = recvPacket.data[3] << 24;
                 partId |= recvPacket.data[2] << 16;
                 partId |= recvPacket.data[1] << 8;
                 partId |= recvPacket.data[0];
                 waiting = 0;
                 break;
-
+            case HID_BL_PROTOCOL_SEND_BL_VER:
+                blVer |= recvPacket.data[1] << 8;
+                blVer |= recvPacket.data[0];
+                waiting = 0;
+                break;
             }
         }
     }
@@ -135,6 +131,8 @@ void writeFile(void)
     struct hidBlProtocolPacket_s sendPacket;
     unsigned long fileLoc = 0;
     unsigned char serPkt[64];
+
+    printf("Writing internal flash:\n");
 
     while (1)
     {
@@ -167,6 +165,7 @@ void eraseIntFlash(void)
 {
     struct hidBlProtocolPacket_s sendPacket;
     unsigned char serPkt[64];
+    printf("Erasing internal flash...");
     if (hidBlProtocolEncodePacket(&sendPacket, 0, HID_BL_PROTOCOL_ERASE_INT_FLASH, 0, 0))
     {
         exit(1);
@@ -175,6 +174,7 @@ void eraseIntFlash(void)
     if (USB_HID_SUCCESS != usb_hid_write(device, serPkt, sizeof(serPkt)))
         error_exit("hid_write()");
     waitResp();
+    printf("Done\n");
 }
 
 unsigned int checkUc(char *requestedUc)
@@ -226,12 +226,36 @@ unsigned int checkUc(char *requestedUc)
     return 0;
 }
 
+unsigned int getFwVer(void)
+{
+    struct hidBlProtocolPacket_s sendPacket;
+    unsigned char serPkt[64];
+
+
+    if (hidBlProtocolEncodePacket(&sendPacket, 0, HID_BL_PROTOCOL_GET_BL_VER, 0, 0))
+    {
+        exit(1);
+    }
+
+    hidBlProtocolSerialisePacket(&sendPacket, serPkt, sizeof(serPkt));
+    if (USB_HID_SUCCESS != usb_hid_write(device, serPkt, sizeof(serPkt)))
+        error_exit("hid_write()");
+    waitResp();
+    printf("BL Ver: %c.%c\n", ((blVer >> 8)&0xff)+0x30, (blVer &0xff)+0x30);
+
+    return 0;
+}
+
 void printUsage(void)
 {
     printf("Usage:\n\n");
     printf("hid_boot cmd device mem_loc filename\n\n");
     printf("Where:\n");
-    printf("cmd is one of p (program), e (erase internal flash), l (list supported controllers)\n");
+    printf("cmd is one of\n");
+    printf("             d (device bootloader version)\n");
+    printf("             e (erase internal flash)\n");
+    printf("             l (list supported controllers)\n");
+    printf("             p (program)\n");
     printf("device is the microcontroller part number.\n");
     printf("mem_loc is the start location in hex (e.g. 0x1000)\n");
     printf("filename is the firmware filename\n\n");
@@ -258,18 +282,26 @@ int main(int argc, char *argv[])
         else if (0 == strncmp(argv[1], "e", 1))
         {
             command = cmdErase;
-            printf("Erasing internal flash:\n\n");
         }
         else if (0 == strncmp(argv[1], "w", 1))
         {
             command = cmdWrite;
-            printf("Writing internal flash:\n\n");
+        }
+        else if (0 == strncmp(argv[1], "d", 1))
+        {
+            command = cmdDevVer;
+            printf("Checking firmware bootloader version:\n\n");
         }
         else
         {
             printUsage();
             exit(1);
         }
+    }
+    else
+    {
+        printUsage();
+        exit(1);
     }
 
     usb_hid_init();
@@ -288,8 +320,6 @@ int main(int argc, char *argv[])
     check(NULL != device, "Supported bootloader not found.");
 
     usb_hid_open(device);
-
-
 
     switch(command)
     {
@@ -330,6 +360,9 @@ int main(int argc, char *argv[])
         }
         else
             printUsage();
+        break;
+    case cmdDevVer:
+        getFwVer();
         break;
     default:
         printUsage();

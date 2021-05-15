@@ -43,6 +43,8 @@
 #define HID_BL_PROTOCOL_GET_PART_ID 0x12
 #define HID_BL_PROTOCOL_SEND_MFR_ID 0x13
 #define HID_BL_PROTOCOL_SEND_PART_ID 0x14
+#define HID_BL_PROTOCOL_GET_BL_VER 0x15
+#define HID_BL_PROTOCOL_SEND_BL_VER 0x16
 /*******************************************/
 
 /*Board IDs (Only used by USB hosts) */
