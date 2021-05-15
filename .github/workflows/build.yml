@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    run: |
-      make clean
-      make
+
+    - name: build
+      run: |
+        make clean
+        make
 
 
 #update version number
