@@ -1,0 +1,44 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    run: |
+      make clean
+      make
+
+#update version number
+#     - name: bump version
+#       run: |
+#         cd bootloader
+#         ls -l
+#         cat version.h
+#         awk -f bumpver.awk version.h
+#         cat version.h
+#         mv version.h ../
+
+#     - name: commit version
+#       uses: test-room-7/action-update-file@v1
+#       with:
+#           file-path: version.h
+#           commit-msg: Update version number
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+# #bump release if successful
+
+#     - uses: "marvinpinto/action-automatic-releases@latest"
+#       with:
+#         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#         automatic_release_tag: "latest"
+#         prerelease: false
+#         title: "Development Build"
+#         files: |
+#           bootloader/build/m032Hidbootloader.bin
