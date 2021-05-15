@@ -15,6 +15,7 @@ jobs:
     - name: build
       run: |
         sudo apt install libusb-1.0-0-dev
+        sudo apt install libudev-dev
         make clean
         make
 
