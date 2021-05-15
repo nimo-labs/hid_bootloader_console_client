@@ -40,4 +40,15 @@ jobs:
         title: "Development Build"
         files: |
           hidBoot
-    - run: ls -l
+
+#merge back to dev
+    - uses: actions/checkout@v2
+      with:
+        path: 'bootloader'
+        
+    - name: Merge master -> dev
+      uses: devmasx/merge-branch@v1.3.1
+      with:
+        type: now
+        target_branch: dev
+        github_token: ${{ github.token }}
