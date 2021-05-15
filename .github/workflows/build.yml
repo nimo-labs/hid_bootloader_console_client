@@ -42,3 +42,4 @@ jobs:
         title: "Development Build"
         files: |
           hidBoot
+    - run: ls -l
