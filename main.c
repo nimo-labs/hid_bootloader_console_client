@@ -249,13 +249,13 @@ unsigned int getFwVer(void)
 void printUsage(void)
 {
     printf("Usage:\n\n");
-    printf("hid_boot cmd device mem_loc filename\n\n");
+    printf("hidBoot cmd device mem_loc filename\n\n");
     printf("Where:\n");
     printf("cmd is one of\n");
     printf("             d (device bootloader version)\n");
     printf("             e (erase internal flash)\n");
     printf("             l (list supported controllers)\n");
-    printf("             p (program)\n");
+    printf("             w (Write)\n");
     printf("device is the microcontroller part number.\n");
     printf("mem_loc is the start location in hex (e.g. 0x1000)\n");
     printf("filename is the firmware filename\n\n");
