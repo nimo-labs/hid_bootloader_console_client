@@ -26,4 +26,4 @@ jobs:
         prerelease: false
         title: "Windows Development Build"
         files: |
-          dist/hidBoot
+          dist/hidBoot.exe
