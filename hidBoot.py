@@ -5,7 +5,7 @@ import usb.util
 import hidBlProtocol
 import sys
 import platform
-
+from sys import exit
 from enum import Enum
 
 
@@ -44,7 +44,7 @@ def usbSendRecv(ep, sendBuf):
 
 def printUsage():
     print("Usage:\n")
-    print("hidBoot cmd device mem_loc filename\n")
+    print("hidBoot cmd device memloc filename\n")
     print("Where:")
     print("cmd is one of")
     print("             d (device bootloader version)")
@@ -52,7 +52,7 @@ def printUsage():
     print("             l (list supported controllers)")
     print("             w (Write)")
     print("device is the microcontroller part number.")
-    print("mem_loc is the start location in hex (e.g. 0x1000)")
+    print("memloc is the start location in hex (e.g. 0x3000)")
     print("filename is the firmware filename\n")
     exit(1)
 
