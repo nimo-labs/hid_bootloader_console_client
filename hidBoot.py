@@ -4,7 +4,7 @@ import usb.core
 import usb.util
 import hidBlProtocol
 import sys
-import time
+import platform
 
 from enum import Enum
 
@@ -88,14 +88,15 @@ if dev is None:
     print('Device not found')
     exit(1)
 
-if dev.is_kernel_driver_active(0):
-    try:
-        dev.detach_kernel_driver(0)
-        # print("kernel driver detached")
-    except usb.core.USBError as e:
-        sys.exit("Could not detach kernel driver: ")
-# else:
-    # print("no kernel driver attached")
+if "Linux" == platform.system():
+    if dev.is_kernel_driver_active(0):
+        try:
+            dev.detach_kernel_driver(0)
+            # print("kernel driver detached")
+        except usb.core.USBError as e:
+            sys.exit("Could not detach kernel driver: ")
+    # else:
+        # print("no kernel driver attached")
 
 
 dev.set_configuration()
