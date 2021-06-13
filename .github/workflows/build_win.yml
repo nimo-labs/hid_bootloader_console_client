@@ -1,4 +1,4 @@
-name: Windows build
+name: Windows dev build
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       run: |
         pip3 install pyusb
         pip3 install pyinstaller
-        pyinstaller --onefile ./hidBoot.py
+        pyinstaller  ./hidBoot.py
 
 #bump release if successful
 

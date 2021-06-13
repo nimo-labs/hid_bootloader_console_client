@@ -1,0 +1,29 @@
+name: Windows build
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: build
+      shell: powershell
+      run: |
+        pip3 install pyusb
+        pip3 install pyinstaller
+        pyinstaller --onefile ./hidBoot.py
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest-win"
+        prerelease: false
+        title: "Windows Stable Build"
+        files: |
+          dist/hidBoot.exe
