@@ -46,16 +46,16 @@ hidBlProtocolPacket_s = {
 
 
 def hidBlProtocolEncodePacket(self, address: int, packetType: int, data: bytearray, fileOffset: int, dataLen: int, buffer: bytearray):
-    print("Address: ", hex(address))
-    print("Pkt type: ", packetType)
-    print("dataLen: ", dataLen)
+    # print("Address: ", hex(address))
+    # print("Pkt type: ", packetType)
+    # print("dataLen: ", dataLen)
 
     i = 0
-    while i < dataLen:
-        print(hex(data[i+fileOffset]), end='')
-        print(' ', end='')
-        i = i + 1
-    print('')
+    # while i < dataLen:
+    #     print(hex(data[i+fileOffset]), end='')
+    #     print(' ', end='')
+    #     i = i + 1
+    # print('')
 
     addressBytes = address.to_bytes(4, 'big')
 
@@ -70,6 +70,6 @@ def hidBlProtocolEncodePacket(self, address: int, packetType: int, data: bytearr
     if dataLen > 0:
         while i < dataLen:
             buffer[i+6] = data[i+fileOffset]
-            print(str(i) + ' ', end='')
+            #print(str(i) + ' ', end='')
             i = i + 1
-        print('')
+        # print('')

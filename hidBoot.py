@@ -21,37 +21,25 @@ usbBuf = bytearray(64)
 
 
 def READ_RETRIES():
-    return 2
+    return 4
 
 
 def usbSendRecv(ep, sendBuf):
-    oldCmd = sendBuf[0]
     recvBuf = bytearray(64)
     retries = READ_RETRIES()
 
     ep.write(sendBuf)
 
-    waiting = 1
-    sendBuf[0] = 0
-    while waiting:
-        recvBuf = dev.read(0x81, 64)
-        if recvBuf[0] > 0:
-            waiting = 0
-            print(recvBuf)
-    return recvBuf
-
-    # while retries > 0:
-    #     try:
-    #         sendBuf[0] = 0
-    #         recvBuf = dev.read(0x81, 64, 10000)
-    #         print("Success")
-    #         # print(recvBuf)
-    #         return recvBuf
-    #     except:
-    #         print("timeout")
-    #         retries = retries - 1
-    #         sendBuf[0] = oldCmd
-    #         ep.write(sendBuf)
+    if hidBlProtocol.Packet.RUN_INT.value is not sendBuf[0]:
+        while retries > 0:
+            try:
+                recvBuf = dev.read(0x81, 64, 5000)
+               # print("Success")
+                return recvBuf
+            except:
+               # print("timeout")
+                retries = retries - 1
+                ep.write(sendBuf)
 
 
 def printUsage():
@@ -97,12 +85,13 @@ dev = usb.core.find(idVendor=0x0416, idProduct=0x5020)
 
 # was it found?
 if dev is None:
-    raise ValueError('Device not found')
+    print('Device not found')
+    exit(1)
 
 if dev.is_kernel_driver_active(0):
     try:
         dev.detach_kernel_driver(0)
-        print("kernel driver detached")
+        # print("kernel driver detached")
     except usb.core.USBError as e:
         sys.exit("Could not detach kernel driver: ")
 # else:
@@ -132,11 +121,14 @@ if Command.DEV_VER == command:
     print("Version: %d.%d" % (usbBuf[7], usbBuf[6]))
 
 elif Command.ERASE == command:
+    print("Eraseing firmware...", end='', flush=True)
     hidBlProtocol.hidBlProtocolEncodePacket(
         0, 0, hidBlProtocol.Packet.ERASE_INT_FLASH, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
     if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
         print("Erase failed")
+    else:
+        print("Done.")
 
 elif Command.WRITE == command:
     try:
@@ -145,11 +137,14 @@ elif Command.WRITE == command:
         f.close()
     except:
         print("File not found!")
-    print(image)
-    print("Len: ", len(image))
+ #   print(image)
+ #   print("Len: ", len(image))
+    print("Writing firmware")
     filePtr = 0
+    progress = 0
     while filePtr < len(image):
-        print('')
+        progress = (filePtr / len(image)) * 100
+        print("Progress: " + "{:.0f}".format(progress) + "%    \r", end='')
         if (len(image) - filePtr) >= 32:
             segLen = 32
         else:
@@ -160,3 +155,7 @@ elif Command.WRITE == command:
         usbBuf = usbSendRecv(ep, usbBuf)
         if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
             print("Write failed")
+        hidBlProtocol.hidBlProtocolEncodePacket(
+            0, 0, hidBlProtocol.Packet.RUN_INT, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
+    print('')
