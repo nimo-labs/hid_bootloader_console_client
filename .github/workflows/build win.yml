@@ -7,11 +7,11 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    shell: powershell
     steps:
     - uses: actions/checkout@v2
 
     - name: build
+      shell: powershell
       run: |
         pip3 install pyusb
         pip3 install pyinstaller
