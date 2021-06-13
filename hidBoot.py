@@ -1,12 +1,20 @@
 #!/usr/bin/python3
 
-import usb.core
-import usb.util
 import hidBlProtocol
 import sys
 import platform
 from sys import exit
 from enum import Enum
+import subprocess
+import sys
+
+try:
+    import usb.core
+    import usb.util
+except:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pyusb"])
+    import usb.core
+    import usb.util
 
 
 class Command(Enum):
