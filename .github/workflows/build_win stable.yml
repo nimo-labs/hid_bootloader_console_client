@@ -13,7 +13,9 @@ jobs:
     - name: build
       shell: powershell
       run: |
-        7z a -tzip hidBoot.zip hidBlProtocol.py hidBoot.py libusb-1.0.dll
+        mkdir hidBoot
+        cp hidBoot.zip hidBlProtocol.py hidBoot.py libusb-1.0.dll hidBoot
+        7z a -tzip hidBoot.zip hidBoot
 
 #bump release if successful
 
