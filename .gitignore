@@ -2,3 +2,4 @@ hidBoot
 hidBoot.exe
 *.bin
 minicom.cap
+__pycache__/*
