@@ -14,7 +14,6 @@ jobs:
       shell: powershell
       run: |
         mkdir hidBoot
-        cp hidBoot.zip hidBoot
         cp hidBlProtocol.py hidBoot
         cp hidBoot.py hidBoot
         cp libusb-1.0.dll hidBoot
