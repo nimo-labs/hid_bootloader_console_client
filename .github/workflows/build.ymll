@@ -1,8 +1,8 @@
 name: C/C++ CI
 
 on:
-  pull_request:
-    branches: [ master ]
+  push:
+    branches: [ dev ]
 
 jobs:
   build:
@@ -12,25 +12,11 @@ jobs:
 
     - name: build
       run: |
-        sudo apt install libusb-1.0-0-dev
-        sudo apt install libudev-dev
-        make clean
-        make
+        pip3 install pyusb
+        pip3 install pyinstaller
+        pyinstaller --onefile ./hidBoot.py
 
-
-#update version number
-    - name: bump version
-      run: |
-        awk -f bumpver.awk version.h
-
-    - name: commit version
-      uses: test-room-7/action-update-file@v1
-      with:
-          file-path: version.h
-          commit-msg: Update version number
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-# #bump release if successful
+#bump release if successful
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -39,14 +25,4 @@ jobs:
         prerelease: false
         title: "Development Build"
         files: |
-          hidBoot
-
-#merge back to dev
-    - uses: actions/checkout@v2
-        
-    - name: Merge master -> dev
-      uses: devmasx/merge-branch@v1.3.1
-      with:
-        type: now
-        target_branch: dev
-        github_token: ${{ github.token }}
+          dist/hidBoot
