@@ -13,9 +13,7 @@ jobs:
     - name: build
       shell: powershell
       run: |
-        pip3 install pyusb
-        pip3 install pyinstaller
-        pyinstaller --onefile ./hidBoot.py
+        7z a -tzip hidBoot.zip hidBlProtocol.py hidBoot.py libusb-1.0.dll
 
 #bump release if successful
 
@@ -26,4 +24,4 @@ jobs:
         prerelease: false
         title: "Windows Stable Build"
         files: |
-          dist/hidBoot.exe
+          hidBoot.zip
