@@ -3,3 +3,5 @@ hidBoot.exe
 *.bin
 minicom.cap
 __pycache__/*
+build.*
+dist/*
