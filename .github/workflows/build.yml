@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Linux build
 
 on:
   push:
@@ -23,6 +23,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "Development Build"
+        title: "Linux Development Build"
         files: |
           dist/hidBoot
