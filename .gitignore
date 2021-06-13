@@ -2,4 +2,4 @@ hidBoot
 hidBoot.exe
 *.bin
 minicom.cap
-__pycache__/hidBlProtocol.cpython-38.pyc
+__pycache__/*
