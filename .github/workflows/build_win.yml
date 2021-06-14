@@ -1,0 +1,31 @@
+name: Windows dev build
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: build
+      shell: powershell
+      run: |
+        mkdir hidBoot
+        cp hidBlProtocol.py hidBoot
+        cp hidBoot.py hidBoot
+        cp libusb-1.0.dll hidBoot
+        7z a -tzip hidBoot.zip hidBoot
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "dev-win"
+        prerelease: false
+        title: "Windows Development Build"
+        files: |
+          hidBoot.zip

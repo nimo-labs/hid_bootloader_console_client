@@ -1,0 +1,28 @@
+name: Linux dev build
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: build
+      run: |
+        pip3 install pyusb
+        pip3 install pyinstaller
+        pyinstaller --onefile ./hidBoot.py
+
+#bump release if successful
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "dev-lin"
+        prerelease: false
+        title: "Linux Development Build"
+        files: |
+          dist/hidBoot
