@@ -23,6 +23,8 @@ class Command(Enum):
     ERASE = 3
     WRITE = 4
     DEV_VER = 5
+    EXT_WRITE = 6
+    EXT_READ = 7
 
 
 usbBuf = bytearray(64)
@@ -38,6 +40,7 @@ def usbSendRecv(ep, sendBuf):
 
     ep.write(sendBuf)
 
+    # RUN_INT is the only command not to ACK
     if hidBlProtocol.Packet.RUN_INT.value is not sendBuf[0]:
         while retries > 0:
             try:
@@ -58,7 +61,9 @@ def printUsage():
     print("             d (device bootloader version)")
     print("             e (erase internal flash)")
     print("             l (list supported controllers)")
-    print("             w (Write)")
+    print("             w (Write internal flash)")
+    print("             x (Write external flash)")
+    print("             y (read external flash)")
     print("device is the microcontroller part number.")
     print("memloc is the start location in hex (e.g. 0x3000)")
     print("filename is the firmware filename\n")
@@ -76,10 +81,20 @@ if len(sys.argv) >= 2:
     elif 'e' == sys.argv[1]:
         command = Command.ERASE
     elif 'w' == sys.argv[1]:
+        print("Writing internal flash\n")
         if len(sys.argv) < 5:
             print("Error, too few arguments for command.\n")
             printUsage()
         command = Command.WRITE
+    elif 'x' == sys.argv[1]:
+        print("Writing external flash\n")
+        if len(sys.argv) < 5:
+            print("Error, too few arguments for command.\n")
+            printUsage()
+        command = Command.EXT_WRITE
+    elif 'y' == sys.argv[1]:
+        command = Command.EXT_READ
+        print("Reading external flash\n")
     elif 'd' == sys.argv[1]:
         command = Command.DEV_VER
         print("Checking firmware bootloader version:\n")
@@ -163,8 +178,51 @@ elif Command.WRITE == command:
         filePtr = filePtr + 32
         usbBuf = usbSendRecv(ep, usbBuf)
         if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
-            print("Write failed")
+            print("\nWrite failed, check address?")
         hidBlProtocol.hidBlProtocolEncodePacket(
             0, 0, hidBlProtocol.Packet.RUN_INT, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
     print('')
+
+elif Command.EXT_WRITE == command:
+    try:
+        f = open(sys.argv[4], "rb")
+        image = f.read()
+        f.close()
+    except:
+        print("File not found!")
+ #   print(image)
+ #   print("Len: ", len(image))
+    print("Writing ext flash image")
+    filePtr = 0
+    progress = 0
+    while filePtr < len(image):
+        progress = (filePtr / len(image)) * 100
+        print("Progress: " + "{:.0f}".format(progress) + "%    \r", end='')
+        if (len(image) - filePtr) >= 32:
+            segLen = 32
+        else:
+            segLen = len(image) - filePtr
+        hidBlProtocol.hidBlProtocolEncodePacket(
+            0, int(sys.argv[3], 16) + filePtr, hidBlProtocol.Packet.WRITE_EXT_FLASH, image, filePtr, segLen, usbBuf)
+        filePtr = filePtr + 32
+        usbBuf = usbSendRecv(ep, usbBuf)
+        if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
+            print("\nWrite failed, check address?")
+        # hidBlProtocol.hidBlProtocolEncodePacket(
+            # 0, 0, hidBlProtocol.Packet.RUN_INT, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
+    print('')
+elif Command.EXT_READ == command:
+    # try:
+    #     f = open(sys.argv[4], "rb")
+    #     image = f.read()
+    #     f.close()
+    # except:
+    #     print("File not found!")
+
+    print("Reading ext flash image")
+    hidBlProtocol.hidBlProtocolEncodePacket(
+        0, 0, hidBlProtocol.Packet.READ_EXT_FLASH, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
+    print('Sent')
