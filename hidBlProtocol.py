@@ -35,6 +35,7 @@ class Packet(Enum):
     GET_PART_ID = 0x12
     SEND_MFR_ID = 0x13
     SEND_PART_ID = 0x14
+    USB_WAIT = 0x15  # Don't timeout due to long running task
 
 
 hidBlProtocolPacket_s = {
