@@ -25,6 +25,7 @@ class Command(Enum):
     DEV_VER = 5
     EXT_WRITE = 6
     EXT_READ = 7
+    CP_EXT_INT = 8
 
 
 usbBuf = bytearray(64)
@@ -46,7 +47,10 @@ def usbSendRecv(ep, sendBuf):
             try:
                 recvBuf = dev.read(0x81, 64, 5000)
                # print("Success")
-                return recvBuf
+                if hidBlProtocol.Packet.USB_WAIT.value == recvBuf[0]:
+                    print("Waiting...")
+                else:
+                    return recvBuf
             except:
                # print("timeout")
                 retries = retries - 1
@@ -58,6 +62,7 @@ def printUsage():
     print("hidBoot cmd device memloc filename\n")
     print("Where:")
     print("cmd is one of")
+    print("             c (Copy external flash to internal)")
     print("             d (device bootloader version)")
     print("             e (erase internal flash)")
     print("             l (list supported controllers)")
@@ -72,32 +77,30 @@ def printUsage():
 
 # ########### MAIN ##############
 if len(sys.argv) >= 2:
-    if 'l' == sys.argv[1]:
+    if 'c' == sys.argv[1]:
+        command = Command.CP_EXT_INT
+    elif 'd' == sys.argv[1]:
+        command = Command.DEV_VER
+    elif 'e' == sys.argv[1]:
+        command = Command.ERASE
+    elif 'l' == sys.argv[1]:
         command = Command.LIST
         print("Supported controllers:\n")
         print("m032lg6ae - Nuvoton M032LG6AE")
         print("\n")
         exit(0)
-    elif 'e' == sys.argv[1]:
-        command = Command.ERASE
     elif 'w' == sys.argv[1]:
-        print("Writing internal flash\n")
         if len(sys.argv) < 5:
             print("Error, too few arguments for command.\n")
             printUsage()
         command = Command.WRITE
     elif 'x' == sys.argv[1]:
-        print("Writing external flash\n")
         if len(sys.argv) < 5:
             print("Error, too few arguments for command.\n")
             printUsage()
         command = Command.EXT_WRITE
     elif 'y' == sys.argv[1]:
         command = Command.EXT_READ
-        print("Reading external flash\n")
-    elif 'd' == sys.argv[1]:
-        command = Command.DEV_VER
-        print("Checking firmware bootloader version:\n")
     else:
         printUsage()
 else:
@@ -139,11 +142,20 @@ assert ep is not None
 
 
 if Command.DEV_VER == command:
+    print("Checking firmware bootloader version:\n")
     hidBlProtocol.hidBlProtocolEncodePacket(
         0, 0, hidBlProtocol.Packet.GET_BL_VER, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
     print("Version: %d.%d" % (usbBuf[7], usbBuf[6]))
-
+elif Command.CP_EXT_INT == command:
+    print("Copying external flash to internal...", end='', flush=True)
+    hidBlProtocol.hidBlProtocolEncodePacket(
+        0, 0, hidBlProtocol.Packet.COPY_EXT_TO_INT, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
+    if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
+        print("Copy failed")
+    else:
+        print("Done.")
 elif Command.ERASE == command:
     print("Eraseing firmware...", end='', flush=True)
     hidBlProtocol.hidBlProtocolEncodePacket(
@@ -191,8 +203,13 @@ elif Command.EXT_WRITE == command:
         f.close()
     except:
         print("File not found!")
+        exit(1)
  #   print(image)
  #   print("Len: ", len(image))
+    print("Erasing ext flash image")
+    hidBlProtocol.hidBlProtocolEncodePacket(
+        0, 0, hidBlProtocol.Packet.ERASE_EXT_FLASH, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
     print("Writing ext flash image")
     filePtr = 0
     progress = 0
