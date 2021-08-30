@@ -7,16 +7,22 @@
 
 ## Usage
 
-Usage examples:  
+```Usage examples:  
 Copy external flash to internal:  
-	hidBoot c  
+	hidBoot c
+
 Device bootloader version:  
-	hidBoot d  
+	hidBoot d
+
 Erase internal flash:  
-	hidBoot e  
+	hidBoot e
+
 List supported controllers:  
-	hidBoot l  
+	hidBoot l
+
 Write internal flash:  
-	hidBoot w 0x3000 blinky.bin  
+	hidBoot w 0x3000 blinky.bin
+
 Write external flash:  
-	hidBoot x blinky.bin  
+	hidBoot x blinky.bin
+```
