@@ -60,17 +60,17 @@ def usbSendRecv(ep, sendBuf):
 def printUsage():
     print("Usage examples:\n")
     print("Copy external flash to internal:")
-    print("    hidBoot.py c\r\n")
+    print("    hidBoot c\r\n")
     print("Device bootloader version:")
-    print("    hidBoot.py d\r\n")
+    print("    hidBoot d\r\n")
     print("Erase internal flash:")
-    print("    hidBoot.py e\r\n")
+    print("    hidBoot e\r\n")
     print("List supported controllers:")
-    print("    hidBoot.py l\r\n")
+    print("    hidBoot l\r\n")
     print("Write internal flash:")
-    print("    hidBoot.py w 0x3000 blinky.bin\r\n")
+    print("    hidBoot w 0x3000 blinky.bin\r\n")
     print("Write external flash:")
-    print("    hidBoot.py x blinky.bin\r\n")
+    print("    hidBoot x blinky.bin\r\n")
     exit(1)
 
 
@@ -85,7 +85,8 @@ if len(sys.argv) >= 2:
     elif 'l' == sys.argv[1]:
         command = Command.LIST
         print("Supported controllers:\n")
-        print("m032lg6ae - Nuvoton M032LG6AE")
+        print("Nuvoton M032LG6AE")
+        print("Atmel ATSAMD21E17A")
         print("\n")
         exit(0)
     elif 'w' == sys.argv[1]:
@@ -145,7 +146,7 @@ if Command.DEV_VER == command:
     hidBlProtocol.hidBlProtocolEncodePacket(
         0, 0, hidBlProtocol.Packet.GET_BL_VER, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
-    print("Version: %d.%d" % (usbBuf[7], usbBuf[6]))
+    print("Version: %d.%d.%d" % (usbBuf[8], usbBuf[7], usbBuf[6]))
 elif Command.CP_EXT_INT == command:
     print("Copying external flash to internal...", end='', flush=True)
     hidBlProtocol.hidBlProtocolEncodePacket(

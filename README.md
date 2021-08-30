@@ -9,15 +9,15 @@
 
 Usage examples:\n
 Copy external flash to internal:
-	hidBoot.py c
+	hidBoot c
 Device bootloader version:
-	hidBoot.py d
+	hidBoot d
 Erase internal flash:
-	hidBoot.py e
+	hidBoot e
 List supported controllers:
-	hidBoot.py l
+	hidBoot l
 Write internal flash:
-	hidBoot.py w 0x3000 blinky.bin
+	hidBoot w 0x3000 blinky.bin
 Write external flash:
-	hidBoot.py x blinky.bin
+	hidBoot x blinky.bin
 
