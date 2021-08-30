@@ -7,17 +7,16 @@
 
 ## Usage
 
-Usage examples:\n
-Copy external flash to internal:
-	hidBoot c
-Device bootloader version:
-	hidBoot d
-Erase internal flash:
-	hidBoot e
-List supported controllers:
-	hidBoot l
-Write internal flash:
-	hidBoot w 0x3000 blinky.bin
-Write external flash:
-	hidBoot x blinky.bin
-
+Usage examples:  
+Copy external flash to internal:  
+	hidBoot c  
+Device bootloader version:  
+	hidBoot d  
+Erase internal flash:  
+	hidBoot e  
+List supported controllers:  
+	hidBoot l  
+Write internal flash:  
+	hidBoot w 0x3000 blinky.bin  
+Write external flash:  
+	hidBoot x blinky.bin  
