@@ -1,5 +1,5 @@
 ![Build status](https://github.com/nimo-labs/hid_bootloader_console_client/actions/workflows/build_lin_stable.yml/badge.svg)
-![Build status](https://github.com/nimo-labs/hid_bootloader_console_client/actions/workflows/build_win_stable.yml/badge.svg?branch=dev)
+![Build status](https://github.com/nimo-labs/hid_bootloader_console_client/actions/workflows/build_win_stable.yml/badge.svg)
 
 # Command line client for the NIMO bootloader
 
