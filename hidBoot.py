@@ -146,7 +146,7 @@ if Command.DEV_VER == command:
     hidBlProtocol.hidBlProtocolEncodePacket(
         0, 0, hidBlProtocol.Packet.GET_BL_VER, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
-    print("Version: %d.%d" % (usbBuf[7], usbBuf[6]))
+    print("Version: %d.%d.%d" % (usbBuf[8], usbBuf[7], usbBuf[6]))
 elif Command.CP_EXT_INT == command:
     print("Copying external flash to internal...", end='', flush=True)
     hidBlProtocol.hidBlProtocolEncodePacket(
