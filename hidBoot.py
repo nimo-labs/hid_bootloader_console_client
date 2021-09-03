@@ -26,6 +26,7 @@ class Command(Enum):
     EXT_WRITE = 6
     EXT_READ = 7
     CP_EXT_INT = 8
+    REBOOT_BOOTLOADER = 9
 
 
 usbBuf = bytearray(64)
@@ -67,6 +68,8 @@ def printUsage():
     print("    hidBoot e\r\n")
     print("List supported controllers:")
     print("    hidBoot l\r\n")
+    print("Reboot application into bootloader:")
+    print("    hidBoot r\r\n")
     print("Write internal flash:")
     print("    hidBoot w 0x3000 blinky.bin\r\n")
     print("Write external flash:")
@@ -89,6 +92,8 @@ if len(sys.argv) >= 2:
         print("Atmel ATSAMD21E17A")
         print("\n")
         exit(0)
+    elif 'r' == sys.argv[1]:
+        command = Command.REBOOT_BOOTLOADER
     elif 'w' == sys.argv[1]:
         if len(sys.argv) < 4:
             print("Error, too few arguments for command.\n")
@@ -246,3 +251,8 @@ elif Command.EXT_READ == command:
         0, 0, hidBlProtocol.Packet.READ_EXT_FLASH, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
     print('Sent')
+elif Command.REBOOT_BOOTLOADER == command:
+    print("Rebooting into bootloader")
+    hidBlProtocol.hidBlProtocolEncodePacket(
+        0, 0, hidBlProtocol.Packet.REBOOT_BOOTLOADER, '', 0, 0, usbBuf)
+    usbBuf = usbSendRecv(ep, usbBuf)
