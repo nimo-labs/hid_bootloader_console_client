@@ -56,6 +56,8 @@ def usbSendRecv(ep, sendBuf):
                # print("timeout")
                 retries = retries - 1
                 ep.write(sendBuf)
+        print("Error: USB timeout.")
+        exit(1)
 
 
 def printUsage():
@@ -157,6 +159,7 @@ elif Command.CP_EXT_INT == command:
     hidBlProtocol.hidBlProtocolEncodePacket(
         0, 0, hidBlProtocol.Packet.COPY_EXT_TO_INT, '', 0, 0, usbBuf)
     usbBuf = usbSendRecv(ep, usbBuf)
+
     if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
         print("Copy failed")
     else:
