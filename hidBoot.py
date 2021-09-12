@@ -46,7 +46,7 @@ def usbSendRecv(ep, sendBuf):
     if hidBlProtocol.Packet.RUN_INT.value is not sendBuf[0]:
         while retries > 0:
             try:
-                recvBuf = dev.read(0x81, 64, 5000)
+                recvBuf = dev.read(0x81, 64, 2000)
                # print("Success")
                 if hidBlProtocol.Packet.USB_WAIT.value == recvBuf[0]:
                     print("Waiting...")
