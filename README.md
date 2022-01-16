@@ -20,6 +20,9 @@ Erase internal flash:
 List supported controllers:  
 	hidBoot l
 
+Reboot application into bootloader:
+    hidBoot r
+
 Write internal flash:  
 	hidBoot w 0x3000 blinky.bin
 

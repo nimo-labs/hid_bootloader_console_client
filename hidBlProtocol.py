@@ -17,10 +17,10 @@ def HID_BL_PROTOCOL_DATA_SIZE():
 class Packet(Enum):
     ACK = 0x01
     NAK = 0x02
-    APP_GET_VER = 0x03
-    APP_SEND_VER = 0x04
-    GET_BL_VER = 0x05
-    SEND_BL_VER = 0x06
+    APP_GET_VER = 0x03  # Request App Ver
+    APP_SEND_VER = 0x04  # App Ver reply
+    GET_BL_VER = 0x05  # Request BL Ver
+    SEND_BL_VER = 0x06  # BL Ver reply
     ERASE_INT_FLASH = 0x07
     WRITE_INT_FLASH = 0x08
     READ_INT_FLASH = 0x09
@@ -29,13 +29,16 @@ class Packet(Enum):
     READ_EXT_FLASH = 0x0C
     WRITE_EXT_FLASH = 0x0D
     VERIFY_EXT_FLASH = 0x0E
-    COPY_EXT_TO_INT = 0x0F
-    RUN_INT = 0x10
+    COPY_EXT_TO_INT = 0x0F  # Copy Application from ext flash to int flash
+    RUN_INT = 0x10  # Jump to Application in internal flash
     GET_MFR_ID = 0x11
     GET_PART_ID = 0x12
     SEND_MFR_ID = 0x13
     SEND_PART_ID = 0x14
     USB_WAIT = 0x15  # Don't timeout due to long running task
+    # Supplied firmware file (in ext flash or USB stream) is too large for the application section
+    ERR_FW_TOO_BIG = 0x16
+    REBOOT_BOOTLOADER = 0xFF
 
 
 hidBlProtocolPacket_s = {

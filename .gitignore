@@ -5,3 +5,4 @@ minicom.cap
 __pycache__/*
 build/*
 dist/*
+hidBoot.spec
