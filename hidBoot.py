@@ -199,7 +199,7 @@ elif Command.WRITE == command:
             else:
                 segLen = len(image) - filePtr
             hidBlProtocol.hidBlProtocolEncodePacket(
-                0, int(sys.argv[3], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
+                0, int(sys.argv[2], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
             filePtr = filePtr + 32
             usbBuf = usbSendRecv(ep, usbBuf)
             if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
