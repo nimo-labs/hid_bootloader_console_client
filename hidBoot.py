@@ -41,19 +41,24 @@ def usbSendRecv(ep, sendBuf):
     retries = READ_RETRIES()
 
     ep.write(sendBuf)
+    waiting = 0
 
     # RUN_INT is the only command not to ACK
     if hidBlProtocol.Packet.RUN_INT.value is not sendBuf[0]:
         while retries > 0:
             try:
-                recvBuf = dev.read(0x81, 64, 2000)
+                recvBuf = dev.read(0x81, 64, 2500)
                # print("Success")
                 if hidBlProtocol.Packet.USB_WAIT.value == recvBuf[0]:
-                    print("Waiting...")
+                    if 0 == waiting:
+                        print("Waiting.", end="", flush=True)
+                        waiting = 1
+                    else:
+                        print(".", end="", flush=True)
                 else:
                     return recvBuf
             except:
-               # print("timeout")
+                print("timeout")
                 retries = retries - 1
                 ep.write(sendBuf)
         print("Error: USB timeout.")
@@ -179,37 +184,37 @@ elif Command.ERASE == command:
 
 elif Command.WRITE == command:
     try:
-        f = open(sys.argv[3], "rb")
+        f = open(sys.argv[4], "rb")
         image = f.read()
         f.close()
+    #   print("Len: ", len(image))
+        print("Writing firmware")
+        filePtr = 0
+        progress = 0
+        while filePtr < len(image):
+            progress = (filePtr / len(image)) * 100
+            print("Progress: " + "{:.0f}".format(progress) + "%    \r", end='')
+            if (len(image) - filePtr) >= 32:
+                segLen = 32
+            else:
+                segLen = len(image) - filePtr
+            hidBlProtocol.hidBlProtocolEncodePacket(
+                0, int(sys.argv[3], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
+            filePtr = filePtr + 32
+            usbBuf = usbSendRecv(ep, usbBuf)
+            if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
+                print("\nWrite failed, check address?")
+        hidBlProtocol.hidBlProtocolEncodePacket(
+            0, 0, hidBlProtocol.Packet.RUN_INT, '', 0, 0, usbBuf)
+        usbBuf = usbSendRecv(ep, usbBuf)
+        print('')
     except:
         print("File not found!")
- #   print(image)
- #   print("Len: ", len(image))
-    print("Writing firmware")
-    filePtr = 0
-    progress = 0
-    while filePtr < len(image):
-        progress = (filePtr / len(image)) * 100
-        print("Progress: " + "{:.0f}".format(progress) + "%    \r", end='')
-        if (len(image) - filePtr) >= 32:
-            segLen = 32
-        else:
-            segLen = len(image) - filePtr
-        hidBlProtocol.hidBlProtocolEncodePacket(
-            0, int(sys.argv[2], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
-        filePtr = filePtr + 32
-        usbBuf = usbSendRecv(ep, usbBuf)
-        if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
-            print("\nWrite failed, check address?")
-    hidBlProtocol.hidBlProtocolEncodePacket(
-        0, 0, hidBlProtocol.Packet.RUN_INT, '', 0, 0, usbBuf)
-    usbBuf = usbSendRecv(ep, usbBuf)
-    print('')
+
 
 elif Command.EXT_WRITE == command:
     try:
-        f = open(sys.argv[2], "rb")
+        f = open(sys.argv[4], "rb")
         image = f.read()
         f.close()
     except:
