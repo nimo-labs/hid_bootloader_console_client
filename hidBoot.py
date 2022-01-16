@@ -184,7 +184,7 @@ elif Command.ERASE == command:
 
 elif Command.WRITE == command:
     try:
-        f = open(sys.argv[4], "rb")
+        f = open(sys.argv[3], "rb")
         image = f.read()
         f.close()
     #   print("Len: ", len(image))
@@ -214,7 +214,7 @@ elif Command.WRITE == command:
 
 elif Command.EXT_WRITE == command:
     try:
-        f = open(sys.argv[4], "rb")
+        f = open(sys.argv[3], "rb")
         image = f.read()
         f.close()
     except:
