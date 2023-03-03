@@ -184,7 +184,7 @@ elif Command.ERASE == command:
 
 elif Command.WRITE == command:
     try:
-        f = open(sys.argv[4], "rb")
+        f = open(sys.argv[3], "rb")
         image = f.read()
         f.close()
     #   print("Len: ", len(image))
@@ -199,7 +199,7 @@ elif Command.WRITE == command:
             else:
                 segLen = len(image) - filePtr
             hidBlProtocol.hidBlProtocolEncodePacket(
-                0, int(sys.argv[3], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
+                0, int(sys.argv[2], 16) + filePtr, hidBlProtocol.Packet.WRITE_INT_FLASH, image, filePtr, segLen, usbBuf)
             filePtr = filePtr + 32
             usbBuf = usbSendRecv(ep, usbBuf)
             if hidBlProtocol.Packet.ACK.value != usbBuf[0]:
@@ -214,7 +214,7 @@ elif Command.WRITE == command:
 
 elif Command.EXT_WRITE == command:
     try:
-        f = open(sys.argv[4], "rb")
+        f = open(sys.argv[3], "rb")
         image = f.read()
         f.close()
     except:
